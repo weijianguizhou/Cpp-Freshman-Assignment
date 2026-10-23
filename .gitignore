@@ -3,6 +3,8 @@
 x64/
 Debug/
 Release/
+build/
+out/
 *.obj
 *.pdb
 *.idb
