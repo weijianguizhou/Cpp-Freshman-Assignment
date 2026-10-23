@@ -26,6 +26,11 @@ public:
         }
     }
 
+    // 读取第 i 行第 j 列的元素（data 是私有成员，外部通过该接口访问）
+    int get(int i, int j) const {
+        return data[i][j];
+    }
+
     ~Matrix() { // 析构函数释放内存
         for (int i = 0; i < rows; ++i)
             delete[] data[i];
@@ -42,9 +47,10 @@ int main() {
     m.inputMatrix();
 
     // 显示输入的矩阵
+    cout << "你输入的矩阵是:" << endl;
     for (int i = 0; i < rows; ++i) {
         for (int j = 0; j < cols; ++j)
-            cout << m.data[i][j] << " ";
+            cout << m.get(i, j) << " ";
         cout << endl;
     }
 

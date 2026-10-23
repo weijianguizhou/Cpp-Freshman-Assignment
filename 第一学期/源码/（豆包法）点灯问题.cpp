@@ -1,5 +1,6 @@
 #include <iostream>
 #include <algorithm>
+#include <climits>
 
 // 定义棋盘大小
 const int BOARD_SIZE = 5;
@@ -30,27 +31,47 @@ bool isAllLightsOn(int matrix[BOARD_SIZE][BOARD_SIZE]) {
     return true;
 }
 
-// 找到使所有灯都点亮的最少点击次数
-std::pair<int, int[BOARD_SIZE * BOARD_SIZE]> findMinClicks(int initialMatrix[BOARD_SIZE][BOARD_SIZE]) {
-    int minClicks = INT_MAX;
-    int bestCombination[BOARD_SIZE * BOARD_SIZE];
+// 结果：最少点击次数 + 对应的点击方案（1 表示该格点过，0 表示没点）
+// 数组无法直接放进 std::pair 返回，所以用结构体打包
+struct ClickResult {
+    int minClicks;
+    int combination[BOARD_SIZE * BOARD_SIZE];
+};
 
-    // 生成所有可能的点击组合
+// 枚举所有点击组合，找到使所有灯都点亮的最少点击次数
+ClickResult findMinClicks(int initialMatrix[BOARD_SIZE][BOARD_SIZE]) {
+    ClickResult best;
+    best.minClicks = INT_MAX;
+    for (int k = 0; k < BOARD_SIZE * BOARD_SIZE; ++k) {
+        best.combination[k] = 0;
+    }
+
     int clickCombination[BOARD_SIZE * BOARD_SIZE];
+
+    // 生成所有可能的点击组合（共 2^25 种）
     for (int i = 0; i < (1 << (BOARD_SIZE * BOARD_SIZE)); ++i) {
+        // 先数出这种组合要点击几次，已经不可能更优就直接跳过
+        int clickCount = 0;
+        for (int j = 0; j < BOARD_SIZE * BOARD_SIZE; ++j) {
+            if (i & (1 << j)) {
+                clickCount++;
+            }
+        }
+        if (clickCount >= best.minClicks) {
+            continue;
+        }
+
         int matrix[BOARD_SIZE][BOARD_SIZE];
         for (int m = 0; m < BOARD_SIZE; ++m) {
             for (int n = 0; n < BOARD_SIZE; ++n) {
                 matrix[m][n] = initialMatrix[m][n];
             }
         }
-        int clickCount = 0;
 
         // 根据当前组合设置点击情况并切换灯的状态
         for (int j = 0; j < BOARD_SIZE * BOARD_SIZE; ++j) {
             if (i & (1 << j)) {
                 clickCombination[j] = 1;
-                clickCount++;
 
                 int row = j / BOARD_SIZE;
                 int col = j % BOARD_SIZE;
@@ -61,16 +82,17 @@ std::pair<int, int[BOARD_SIZE * BOARD_SIZE]> findMinClicks(int initialMatrix[BOA
         }
 
         // 如果所有灯都点亮且点击次数更少，更新最小点击次数和最佳组合
-        if (isAllLightsOn(matrix) && clickCount < minClicks) {
-            minClicks = clickCount;
+        if (isAllLightsOn(matrix)) {
+            best.minClicks = clickCount;
             for (int k = 0; k < BOARD_SIZE * BOARD_SIZE; ++k) {
-                bestCombination[k] = clickCombination[k];
+                best.combination[k] = clickCombination[k];
             }
         }
     }
 
-    return { minClicks, bestCombination };
+    return best;
 }
+
 int main() {
     // 示例初始灯状态矩阵，这里假设全部是熄灭状态（0），你可以根据实际情况修改
     int initialMatrix[BOARD_SIZE][BOARD_SIZE] = {
@@ -81,12 +103,26 @@ int main() {
         {0, 0, 0, 0, 0}
     };
 
-    auto result = findMinClicks(initialMatrix);
-    std::cout << "最少点击次数: " << result.first << std::endl;
+    ClickResult result = findMinClicks(initialMatrix);
+
+    if (result.minClicks == INT_MAX) {
+        std::cout << "无解，无论怎么点都无法让所有灯点亮" << std::endl;
+        return 0;
+    }
+
+    std::cout << "最少点击次数: " << result.minClicks << std::endl;
 
     std::cout << "最佳点击组合: ";
     for (int i = 0; i < BOARD_SIZE * BOARD_SIZE; ++i) {
-        std::cout << result.second[i];
+        std::cout << result.combination[i];
+    }
+    std::cout << std::endl;
+
+    std::cout << "需要点击的格子（行, 列）: ";
+    for (int i = 0; i < BOARD_SIZE * BOARD_SIZE; ++i) {
+        if (result.combination[i] == 1) {
+            std::cout << "(" << i / BOARD_SIZE + 1 << "," << i % BOARD_SIZE + 1 << ") ";
+        }
     }
     std::cout << std::endl;
 

@@ -1,3 +1,36 @@
+#include <iostream>
+
+// 单链表结点
+struct Node {
+    double data;
+    Node* next;
+};
+
+// 用链表实现的栈，topNode 指向栈顶
+class Stack {
+private:
+    Node* topNode;
+    int stackSize;
+
+public:
+    Stack();
+    Stack(const double* arr, int n);
+    Stack(const Stack& s);
+    ~Stack();
+
+    void push(const double& n);
+    void pop();
+    const double& top() const;
+    bool isEmpty() const;
+    int size() const;
+    void print() const;
+};
+
+Stack::Stack() {
+    topNode = nullptr;
+    stackSize = 0;
+}
+
 Stack::Stack(const double* arr, int n) {
     topNode = nullptr;
     stackSize = 0;
@@ -82,3 +115,24 @@ void Stack::print() const {
     std::cout << std::endl;
 }
 
+int main() {
+    double arr[] = {1.5, 2.5, 3.5, 4.5};
+    Stack s(arr, 4);
+    s.print();
+
+    s.push(5.5);
+    s.print();
+    std::cout << "栈顶元素: " << s.top() << std::endl;
+    s.pop();
+    std::cout << "弹出后栈顶元素: " << s.top() << std::endl;
+
+    // 拷贝构造：两份栈互不影响
+    Stack t(s);
+    t.push(9.9);
+    std::cout << "原栈: ";
+    s.print();
+    std::cout << "副本: ";
+    t.print();
+
+    return 0;
+}
