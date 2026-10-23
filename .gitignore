@@ -1,0 +1,23 @@
+# Visual Studio / VS Code 缓存与构建产物
+.vs/
+x64/
+Debug/
+Release/
+*.obj
+*.pdb
+*.idb
+*.ilk
+*.tlog
+*.ipch
+*.suo
+*.user
+*.VC.db
+*.opendb
+
+# Dev-C++ 构建产物
+*.o
+*.layout
+
+# Windows 系统文件
+Thumbs.db
+desktop.ini
